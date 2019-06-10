@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSend.setOnClickListener {
             val email = Email(editEmail.text.toString(), editSubject.text.toString(), editField.text.toString())
-            val result = validAddress(email)
+            val result = validate(email)
             when (result) {
                 is Success -> Toast.makeText(this, "Ok", Toast.LENGTH_SHORT).show()
                 is Failure -> Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
@@ -22,16 +22,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun validate(email: Email) = validAddress(email) then ::notBlank
+
     fun validAddress(email: Email): Result<Email> {
-        if (email.to.isEmpty()){
+        if (email.to.isEmpty()) {
             return Failure("Please enter email")
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email.to).matches()){
+        if (!Patterns.EMAIL_ADDRESS.matcher(email.to).matches()) {
             return Failure("Invalid email address")
         }
-        if (email.subject.isEmpty() || email.body.isEmpty()){
+        return Success(email)
+    }
+
+    fun notBlank(email: Email): Result<Email> {
+        if (email.subject.isEmpty() || email.body.isEmpty()) {
             return Failure("Subject or body must not be blank")
         }
         return Success(email)
     }
+
 }
